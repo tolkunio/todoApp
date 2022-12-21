@@ -20,6 +20,18 @@ function printTodo(todo) {
   li.innerHTML = `<span>${todo.title} <i>by</i> <b>${getUserNameById(
     todo.userId
   )}</b></span>`;
+
+  const status = document.createElement("input");
+  status.type = "checkbox";
+  status.checked = todo.completed;
+  status.addEventListener("change", handleTodoChanged);
+
+  const close = document.createElement("span");
+  close.innerHTML = "$times";
+  close.className = "close";
+
+  li.prepend(status);
+  li.append(close);
   todoList.prepend(li);
 }
 function createUserOption(user) {
@@ -49,6 +61,14 @@ function handleSubmit(event) {
     completed: false,
   });
 }
+function handleTodoChanged() {
+  //   const todoId = this.parentElement.dataset.id;
+  const parentElement = this.parentElement;
+  const dataset = parentElement.dataset;
+  const id = dataset.id;
+  const completed = this.checked;
+  toggleTodoCompleted(id, completed);
+}
 //async logic
 async function getAllTodos() {
   const todosLink = "https://jsonplaceholder.typicode.com/todos";
@@ -74,4 +94,22 @@ async function createTodo(todo) {
   });
   const todoJson = await todosResponse.json();
   printTodo(todoJson);
+}
+
+async function toggleTodoCompleted(todoId, completed) {
+  const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${todoId}`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({ completed }),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (!response.ok) {
+    //Error
+  }
+  const data = await response.json();
+  console.log(data);
 }
