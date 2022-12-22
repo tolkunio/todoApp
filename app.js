@@ -1,4 +1,5 @@
-//Globals
+function(){
+    //Globals
 const todoList = document.getElementById("todo-list");
 const userSelect = document.getElementById("user-todo");
 const form = document.querySelector("form");
@@ -83,61 +84,89 @@ function handleClose() {
   const id = dataset.id;
   deleteTodo(id);
 }
+
+function alertError(error) {
+  console.alert(error);
+}
 //async logic
 async function getAllTodos() {
-  const todosLink = "https://jsonplaceholder.typicode.com/todos";
-  const todoResponse = await fetch(todosLink);
-  const todoData = await todoResponse.json();
-  return todoData;
+  try {
+    const todosLink = "https://jsonplaceholder.typicode.com/todos";
+    const todoResponse = await fetch(todosLink);
+    const todoData = await todoResponse.json();
+    return todoData;
+  } catch (e) {
+    alertError(e);
+  }
 }
 async function getAllUsers() {
-  const usersLink = "https://jsonplaceholder.typicode.com/users";
-  const userResponse = await fetch(usersLink);
-  const userData = await userResponse.json();
-  return userData;
+  try {
+    const usersLink = "https://jsonplaceholder.typicode.com/users";
+    const userResponse = await fetch(usersLink);
+    const userData = await userResponse.json();
+    return userData;
+  } catch (e) {
+    alertError(e);
+  }
 }
 
 async function createTodo(todo) {
-  const todoLink = "https://jsonplaceholder.typicode.com/todos";
-  const todosResponse = await fetch(todoLink, {
-    method: "POST",
-    body: JSON.stringify(todo),
-    headers: {
-      "Content-Type": "application/json",
-    },
-  });
-  const todoJson = await todosResponse.json();
-  printTodo(todoJson);
+  try {
+    const todoLink = "https://jsonplaceholder.typicode.com/todos";
+    const todosResponse = await fetch(todoLink, {
+      method: "POST",
+      body: JSON.stringify(todo),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const todoJson = await todosResponse.json();
+    printTodo(todoJson);
+  } catch (e) {
+    alertError(e);
+  }
 }
 
 async function toggleTodoCompleted(todoId, completed) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/todos/${todoId}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({ completed }),
-      headers: {
-        "Content-Type": "application/json",
-      },
+  try {
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${todoId}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({ completed }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (!response.ok) {
+      throw new Error("failed to connect with server");
     }
-  );
-  if (!response.ok) {
-    //Error
+    const data = await response.json();
+  } catch (e) {
+    alertError(e);
   }
-  const data = await response.json();
 }
 
 async function deleteTodo(todoId) {
-  const response = await fetch(
-    `https://jsonplaceholder.typicode.com/todos/${todoId}`,
-    {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-      },
+  try {
+    const response = await fetch(
+      `https://jsonplaceholder.typicode.com/todos/${todoId}`,
+      {
+        method: "DELETE",
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
+    if (response.ok) {
+      removeTodo(todoId);
+    } else {
+      throw new Error("failed to connect with server");
     }
-  );
-  if (response.ok) {
-    removeTodo(todoId);
+  } catch (e) {
+    alertError(e);
   }
+}
+
 }
