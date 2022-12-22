@@ -27,8 +27,9 @@ function printTodo(todo) {
   status.addEventListener("change", handleTodoChanged);
 
   const close = document.createElement("span");
-  close.innerHTML = "$times";
+  close.innerHTML = "x";
   close.className = "close";
+  close.addEventListener("click", handleClose);
 
   li.prepend(status);
   li.append(close);
@@ -53,8 +54,6 @@ function initApp() {
 
 function handleSubmit(event) {
   event.preventDefault();
-  //   console.log(form.todo);
-  //   console.log(form.user);
   createTodo({
     userId: Number(form.user.value),
     title: form.todo.value,
@@ -68,6 +67,21 @@ function handleTodoChanged() {
   const id = dataset.id;
   const completed = this.checked;
   toggleTodoCompleted(id, completed);
+}
+
+function removeTodo(todoId) {
+  todos = todos.filter((todo) => todo.id !== todoId);
+  const todo = todoList.querySelector(`[data-id="${todoId}"]`);
+  todo.querySelector("input").removeEventListener("change", handleTodoChanged);
+  todo.querySelector(".close").removeEventListener("click", handleClose);
+  todo.remove();
+}
+
+function handleClose() {
+  const parentElement = this.parentElement;
+  const dataset = parentElement.dataset;
+  const id = dataset.id;
+  deleteTodo(id);
 }
 //async logic
 async function getAllTodos() {
@@ -111,5 +125,19 @@ async function toggleTodoCompleted(todoId, completed) {
     //Error
   }
   const data = await response.json();
-  console.log(data);
+}
+
+async function deleteTodo(todoId) {
+  const response = await fetch(
+    `https://jsonplaceholder.typicode.com/todos/${todoId}`,
+    {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+      },
+    }
+  );
+  if (response.ok) {
+    removeTodo(todoId);
+  }
 }
